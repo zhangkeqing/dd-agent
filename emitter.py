@@ -83,6 +83,11 @@ def sanitize_payload(item, log, sanitize_func):
 
 def post_payload(url, message, serialize_func, agentConfig, log):
     log.debug('http_emitter: attempting postback to ' + string.split(url, "api_key=")[0])
+    uuid = message['uuid']
+    if 'series' in message:
+        del message['series']
+    elif 'service_checks' in message:
+        message = message['service_checks']
 
     try:
         payloads = serialize_func(message, MAX_COMPRESSED_SIZE, 0, log)
@@ -100,7 +105,7 @@ def post_payload(url, message, serialize_func, agentConfig, log):
 
     for payload in payloads:
         try:
-            headers = get_post_headers(agentConfig, payload)
+            headers = get_post_headers(agentConfig, uuid, payload)
             r = requests.post(url, data=payload, timeout=5, headers=headers)
 
             r.raise_for_status()
@@ -211,7 +216,7 @@ def serialize_and_compress_checkruns_payload(checkruns_payload, max_compressed_s
 
 
 def split_payload(legacy_payload):
-    metrics_payload = {"series": []}
+    metrics_payload = {"series": [], 'uuid': legacy_payload['uuid']}
 
     # See https://github.com/DataDog/dd-agent/blob/5.11.1/checks/__init__.py#L905-L926 for format
     for ts in legacy_payload['metrics']:
@@ -240,7 +245,8 @@ def split_payload(legacy_payload):
 
     del legacy_payload['metrics']
 
-    checkruns_payload = legacy_payload["service_checks"]
+    checkruns_payload = {'service_checks': [], 'uuid': legacy_payload['uuid']}
+    checkruns_payload['service_checks'] = legacy_payload["service_checks"]
 
     del legacy_payload["service_checks"]
 
@@ -272,12 +278,13 @@ def http_emitter(message, log, agentConfig, endpoint):
     post_payload(checkruns_endpoint, checkruns_payload, serialize_and_compress_checkruns_payload, agentConfig, log)
 
 
-def get_post_headers(agentConfig, payload):
+def get_post_headers(agentConfig, uuid, payload):
     return {
         'User-Agent': 'Datadog Agent/%s' % agentConfig['version'],
         'Content-Type': 'application/json',
         'Content-Encoding': 'deflate',
         'Accept': 'text/html, */*',
+        'uuid': uuid,
         'Content-MD5': md5(payload).hexdigest(),
         'DD-Collector-Version': get_version()
     }

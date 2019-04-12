@@ -11,7 +11,7 @@ import struct
 import time
 
 # 3rd party
-from docker import Client, tls
+from docker import client, tls
 from docker.errors import NotFound
 
 # project
@@ -136,7 +136,7 @@ class DockerUtil:
         self.last_init_retry = now
         self.left_init_retries -= 1
         try:
-            self._client = Client(**self.settings)
+            self._client = client.DockerClient(**self.settings)
             self._client.ping()
             return self._client
         except Exception as ex:
