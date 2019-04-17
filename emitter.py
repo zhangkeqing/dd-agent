@@ -85,7 +85,7 @@ def post_payload(url, message, serialize_func, agentConfig, log):
     log.debug('http_emitter: attempting postback to ' + string.split(url, "api_key=")[0])
     uuid = message['uuid']
     if 'series' in message:
-        del message['series']
+        del message['uuid']
     elif 'service_checks' in message:
         message = message['service_checks']
 
