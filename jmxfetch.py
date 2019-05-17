@@ -493,7 +493,7 @@ def get_jmx_checks(confd_path=None, auto_conf=False):
     return jmx_checks
 
 def init(config_path=None):
-    agent_config = get_config(parse_args=False, cfg_path=config_path)
+    agent_config = get_config(parse_args=False, cfg_path=config_path, allow_invalid_api_key=True)
     try:
         confd_path = get_confd_path()
     except PathNotFound as e:

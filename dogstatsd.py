@@ -684,7 +684,7 @@ def main(config_path=None):
     opts, args = parser.parse_args()
 
     try:
-        c = get_config(parse_args=False, cfg_path=config_path)
+        c = get_config(parse_args=False, cfg_path=config_path, allow_invalid_api_key=True)
     except:
         return 2
 
