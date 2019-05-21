@@ -486,11 +486,11 @@ class Application(tornado.web.Application):
     def _postMetrics(self):
 
         if len(self._metrics) > 0:
-            self._metrics['uuid'] = get_uuid()
+            self._metrics['uuid'] = self._agentConfig['uuid'] #get_uuid()
             self._metrics['internalHostname'] = get_hostname(self._agentConfig)
             self._metrics['apiKey'] = self._agentConfig['api_key']
             MetricTransaction(json.dumps(self._metrics),
-                              headers={'Content-Type': 'application/json'})
+                              headers={'Content-Type': 'application/json', 'uuid': self._agentConfig['uuid']})
             self._metrics = {}
 
     def run(self):
@@ -579,7 +579,7 @@ class Application(tornado.web.Application):
 
 
 def init(skip_ssl_validation=False, use_simple_http_client=False):
-    agentConfig = get_config(parse_args=False)
+    agentConfig = get_config(parse_args=False, allow_invalid_api_key=True)
 
     port = agentConfig.get('listen_port', 17123)
     if port is None:
