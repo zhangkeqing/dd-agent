@@ -253,7 +253,7 @@ class Agent(Daemon):
         # Intialize the collector.
         if not config:
             try:
-                config = get_config(parse_args=True)
+                config = get_config(parse_args=True, allow_invalid_api_key=True)
             except:
                 log.warning("Failed to load configuration")
                 sys.exit(2)
@@ -498,7 +498,7 @@ class Agent(Daemon):
 
 def main():
     options, args = get_parsed_args()
-    agentConfig = get_config(options=options)
+    agentConfig = get_config(options=options, allow_invalid_api_key=True)
     autorestart = agentConfig.get('autorestart', False)
     hostname = get_hostname(agentConfig)
     in_developer_mode = agentConfig.get('developer_mode')
